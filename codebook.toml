@@ -1,0 +1,13 @@
+dictionaries = [
+    "en_gb",
+    "en_us",
+    "ru",
+]
+words = [
+    "aesgcm",
+    "encryptable",
+    "securepayload",
+    "валидировать",
+    "воркер",
+    "воркера",
+]
