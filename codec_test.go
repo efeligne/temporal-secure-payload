@@ -21,6 +21,7 @@ const testKey = "0123456789abcdef0123456789abcdef"
 const (
 	errNewDataConverterFmt = "new data converter: %v"
 	expectedTwoStrings     = 2
+	jsonPlainEncoding      = "json/plain"
 	jwtToken               = "token"
 	jwtField               = "jwt"
 	tokenField             = "token"
@@ -177,7 +178,7 @@ func TestCodec_LeavesPlainPayloadAsIs(t *testing.T) {
 	}
 
 	gotEncoding := string(encoded[0].GetMetadata()[converter.MetadataEncoding])
-	if gotEncoding != "json/plain" {
+	if gotEncoding != jsonPlainEncoding {
 		t.Fatalf("plain payload encoding changed unexpectedly: %s", gotEncoding)
 	}
 }
@@ -263,7 +264,7 @@ func TestNewDataConverter_LeavesNonSensitiveValuesUnchanged(t *testing.T) {
 	}
 
 	gotEncoding := string(payload.GetMetadata()[converter.MetadataEncoding])
-	if gotEncoding != "json/plain" {
+	if gotEncoding != jsonPlainEncoding {
 		t.Fatalf("plain payload encoding changed unexpectedly: %s", gotEncoding)
 	}
 
@@ -657,6 +658,31 @@ func TestNewDataConverter_TopLevelSensitiveWithNestedWrapper_IsPreservedAndEncry
 
 	if jwt != jwtToken {
 		t.Fatalf(errJWTMismatchFmt, jwt, jwtToken)
+	}
+}
+
+func TestSensitive_DefaultConverterDoesNotSerializeToEmptyObject(t *testing.T) {
+	t.Parallel()
+
+	defaultConverter := converter.GetDefaultDataConverter()
+
+	payload, err := defaultConverter.ToPayload(securepayload.Sensitive("Bearer token-value"))
+	if err != nil {
+		t.Fatalf("default converter ToPayload: %v", err)
+	}
+
+	encoding := string(payload.GetMetadata()[converter.MetadataEncoding])
+	if encoding != jsonPlainEncoding {
+		t.Fatalf("payload encoding: got %q, want %q", encoding, jsonPlainEncoding)
+	}
+
+	var decoded string
+	if err := defaultConverter.FromPayload(payload, &decoded); err != nil {
+		t.Fatalf("default converter FromPayload: %v", err)
+	}
+
+	if decoded != "Bearer token-value" {
+		t.Fatalf("decoded value: got %q, want %q", decoded, "Bearer token-value")
 	}
 }
 

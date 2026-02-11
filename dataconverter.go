@@ -1,6 +1,7 @@
 package securepayload
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -12,6 +13,17 @@ import (
 
 type sensitiveValue struct {
 	value any
+}
+
+// MarshalJSON preserves wrapped value when the default JSON payload converter is used
+// (e.g. Temporal SDK memo serialization paths that bypass custom DataConverter).
+func (s sensitiveValue) MarshalJSON() ([]byte, error) {
+	payload, err := json.Marshal(s.value)
+	if err != nil {
+		return nil, fmt.Errorf("marshal sensitiveValue: %w", err)
+	}
+
+	return payload, nil
 }
 
 var (
