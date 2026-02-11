@@ -6,6 +6,7 @@ dictionaries = [
 words = [
     "aesgcm",
     "encryptable",
+    "nilable",
     "securepayload",
     "валидировать",
     "воркер",
